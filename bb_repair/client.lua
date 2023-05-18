@@ -1,4 +1,3 @@
--- Load the configuration file
 Config = {}
 local configFile = LoadResourceFile(GetCurrentResourceName(), "config/config.lua")
 if configFile then
@@ -25,12 +24,26 @@ RegisterCommand('repair', function(source, args)
             TriggerEvent('chatMessage', "BB_AutoRepair", {200, 0, 0}, "Your car is a lot better!")
         end
     else
-        -- Prompt the player to go to the repair location
-        TriggerEvent('chatMessage', "BB_AutoRepair", {200, 0, 0}, "Please go to the repair location.")
+        -- Prompt the player to go to a repair location
+        local repairLocationsString = GetRepairLocationsString()
+        TriggerEvent('chatMessage', "BB_AutoRepair", {200, 0, 0}, "Please go to one of the repair locations: " .. repairLocationsString)
     end
 end)
 
 function IsPlayerAtRepairLocation(playerCoords)
-    local distance = #(playerCoords - Config.RepairLocation)
-    return distance < Config.RepairDistanceThreshold
+    for _, location in ipairs(Config.RepairLocations) do
+        local distance = #(playerCoords - location)
+        if distance < Config.RepairDistanceThreshold then
+            return true
+        end
+    end
+    return false
+end
+
+function GetRepairLocationsString()
+    local repairLocationsString = ""
+    for _, location in ipairs(Config.RepairLocations) do
+        repairLocationsString = repairLocationsString .. "(" .. location.x .. ", " .. location.y .. ", " .. location.z .. ") "
+    end
+    return repairLocationsString
 end
